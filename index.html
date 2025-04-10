@@ -70,7 +70,7 @@
 
     document.getElementById('username').textContent = username;
 
-    fetch('/api/submit_user', {
+    fetch('https://script.google.com/macros/s/AKfycby8MX9xnXy143e2Nn_4YtnB_otQfzan0MFbS-e2ZOBGNLwKNnvy-l9Kef5P8gwaeR3g/exec', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: userId, username: username })
