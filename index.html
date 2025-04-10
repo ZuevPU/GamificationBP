@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Цифровой Машук — Профиль</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <div class="max-w-xl mx-auto p-6">
+    <!-- Шапка -->
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold">🎓 Директора на высоте</h1>
+      <p class="text-sm text-gray-600">Система геймификации обучения</p>
+    </div>
+
+    <!-- Профиль -->
+    <div class="bg-white rounded-2xl shadow p-4 mb-4">
+      <h2 class="text-xl font-semibold mb-2">👤 Профиль участника</h2>
+      <p><strong>Имя:</strong> <span id="username">–</span></p>
+      <p><strong>Баллы:</strong> <span id="points" class="text-green-600 font-bold">…</span></p>
+      <div class="mt-3">
+        <label class="block text-sm text-gray-700 mb-1">Прогресс до награды:</label>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div id="progress-bar" class="bg-green-500 h-3 rounded-full" style="width: 0%"></div>
+        </div>
+        <p id="progress-text" class="text-xs text-right text-gray-600">…</p>
+      </div>
+    </div>
+
+    <!-- История действий -->
+    <div class="bg-white rounded-2xl shadow p-4 mb-4">
+      <h2 class="text-xl font-semibold mb-2">📜 История баллов</h2>
+      <ul id="history-list" class="text-sm list-disc pl-4">
+        <li>Загрузка истории...</li>
+      </ul>
+    </div>
+
+    <!-- Ввод кодового слова -->
+    <div class="bg-white rounded-2xl shadow p-4 mb-4">
+      <h2 class="text-xl font-semibold mb-2">🔑 Введите кодовое слово</h2>
+      <form id="keyword-form" class="flex gap-2">
+        <input id="keyword-input" type="text" placeholder="#знаниесила" class="flex-grow border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none" />
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">Отправить</button>
+      </form>
+    </div>
+
+    <!-- Доступные бонусы -->
+    <div class="bg-white rounded-2xl shadow p-4">
+      <h2 class="text-xl font-semibold mb-2">🎁 Доступные бонусы</h2>
+      <ul id="bonuses-list" class="text-sm space-y-2">
+        <li>Загрузка бонусов...</li>
+      </ul>
+    </div>
+
+    <!-- Футер -->
+    <div class="text-center text-xs text-gray-500 mt-6">
+      Центр знаний Машук © 2025
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    const user = tg.initDataUnsafe.user;
+
+    const userId = user.id;
+    const username = user.username || user.first_name;
+
+    document.getElementById('username').textContent = username;
+
+    fetch('/api/submit_user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, username: username })
+    })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('points').textContent = `${data.points} 💎`;
+        document.getElementById('progress-bar').style.width = `${Math.min((data.points / 20) * 100, 100)}%`;
+        document.getElementById('progress-text').textContent = `${data.points} / 20`;
+
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = '';
+        (data.history || []).forEach(entry => {
+          const li = document.createElement('li');
+          li.textContent = `${entry}`;
+          historyList.appendChild(li);
+        });
+
+        const bonusesList = document.getElementById('bonuses-list');
+        bonusesList.innerHTML = '';
+        data.bonuses.forEach(bonus => {
+          const li = document.createElement('li');
+          if (bonus.Доступен === 'да') {
+            li.innerHTML = `✨ <a href="${bonus['Содержание бонуса']}" class="text-blue-600 underline" target="_blank">${bonus['Тип бонуса']}</a>`;
+          } else {
+            li.innerHTML = `🔒 ${bonus['Тип бонуса']} (нужно ещё ${bonus.Недостает} баллов)`;
+          }
+          bonusesList.appendChild(li);
+        });
+      });
+
+    document.getElementById('keyword-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const keyword = document.getElementById('keyword-input').value.trim();
+      if (!keyword) return;
+
+      fetch('/api/submit_keyword', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, keyword })
+      })
+      .then(res => res.json())
+      .then(result => {
+        alert(result.message);
+        location.reload();
+      });
+    });
+  </script>
+</body>
+</html>
