@@ -60,30 +60,29 @@
     </div>
   </div>
 
-<script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
 
-  const user = tg.initDataUnsafe.user;
-  const userId = user?.id;
-  const username = user?.username || user?.first_name || "Без имени";
+    const user = tg.initDataUnsafe.user;
+    const keyword = tg.initDataUnsafe.start_param; // ← QR-параметр
 
-  console.log("🧾 user_id:", userId);
-  console.log("🧾 username:", username);
+    const userId = user?.id;
+    const username = user?.username || user?.first_name || "Без имени";
 
-  document.getElementById('username').textContent = username;
+    console.log("🧾 user_id:", userId);
+    console.log("🧾 username:", username);
+    console.log("🏷️ start_param (keyword):", keyword);
 
-  fetch('https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app/api/submit_user', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ user_id: userId, username: username })
-  })
+    document.getElementById('username').textContent = username;
+
+    fetch('https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app/api/submit_user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, username: username })
+    })
     .then(res => res.json())
     .then(data => {
-      console.log("📦 Ответ от сервера:", data);
-
       document.getElementById('points').textContent = `${data.points ?? 0} 💎`;
       document.getElementById('progress-bar').style.width = `${Math.min((data.points / 20) * 100, 100)}%`;
       document.getElementById('progress-text').textContent = `${data.points ?? 0} / 20`;
@@ -92,7 +91,7 @@
       historyList.innerHTML = '';
       (data.history || []).forEach(entry => {
         const li = document.createElement('li');
-        li.textContent = `${entry}`;
+        li.textContent = entry;
         historyList.appendChild(li);
       });
 
@@ -107,44 +106,39 @@
         }
         bonusesList.appendChild(li);
       });
-    })
-    .catch(err => {
-      console.error("❌ Ошибка при загрузке данных:", err);
     });
 
-  document.getElementById('keyword-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const keyword = document.getElementById('keyword-input').value.trim();
-    if (!keyword) return;
+    // Отправка keyword из QR или deeplink
+    if (keyword) {
+      fetch('https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app/api/submit_keyword', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user_id: userId, keyword: keyword })
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("🎯 Ответ по keyword:", data);
+      });
+    }
 
-    fetch('/api/submit_keyword', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, keyword })
-    })
-    .then(res => res.json())
-    .then(result => {
-      alert(result.message);
-      location.reload();
+    document.getElementById('keyword-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const manualKeyword = document.getElementById('keyword-input').value.trim();
+      if (!manualKeyword) return;
+
+      fetch('https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app/api/submit_keyword', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, keyword: manualKeyword })
+      })
+      .then(res => res.json())
+      .then(result => {
+        alert(result.message || "Баллы начислены!");
+        location.reload();
+      });
     });
-  });
-  // Получаем код из адресной строки, если есть
-const urlParams = new URLSearchParams(window.location.search);
-const keyword = urlParams.get('keyword');
-
-if (keyword) {
-  fetch('https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app/api/submit_keyword', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: userId, keyword: keyword })
-  })
-    .then(res => res.json())
-    .then(result => {
-      console.log("🎯 Ответ на keyword:", result);
-    });
-}
-
-</script>
-
+  </script>
 </body>
 </html>
