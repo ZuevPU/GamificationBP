@@ -60,66 +60,75 @@
     </div>
   </div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    const user = tg.initDataUnsafe.user;
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
 
-    const userId = user.id;
-    const username = user.username || user.first_name;
+  const user = tg.initDataUnsafe.user;
+  const userId = user?.id;
+  const username = user?.username || user?.first_name || "Без имени";
 
-    document.getElementById('username').textContent = username;
-fetch('https://telegram-gamification-proxy.vercel.app/api/submit_user', {
-  method: 'POST',
-  mode: 'no-cors', // ← важно!
-  headers: {
-    'Content-Type': 'text/plain' // ← чтобы не срабатывал preflight-запрос
-  },
-  body: JSON.stringify({ user_id: userId, username: username })
-})
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('points').textContent = `${data.points} 💎`;
-        document.getElementById('progress-bar').style.width = `${Math.min((data.points / 20) * 100, 100)}%`;
-        document.getElementById('progress-text').textContent = `${data.points} / 20`;
+  console.log("🧾 user_id:", userId);
+  console.log("🧾 username:", username);
 
-        const historyList = document.getElementById('history-list');
-        historyList.innerHTML = '';
-        (data.history || []).forEach(entry => {
-          const li = document.createElement('li');
-          li.textContent = `${entry}`;
-          historyList.appendChild(li);
-        });
+  document.getElementById('username').textContent = username;
 
-        const bonusesList = document.getElementById('bonuses-list');
-        bonusesList.innerHTML = '';
-        data.bonuses.forEach(bonus => {
-          const li = document.createElement('li');
-          if (bonus.Доступен === 'да') {
-            li.innerHTML = `✨ <a href="${bonus['Содержание бонуса']}" class="text-blue-600 underline" target="_blank">${bonus['Тип бонуса']}</a>`;
-          } else {
-            li.innerHTML = `🔒 ${bonus['Тип бонуса']} (нужно ещё ${bonus.Недостает} баллов)`;
-          }
-          bonusesList.appendChild(li);
-        });
+  fetch('https://tg-gamification-proxy.vercel.app/api/submit_user', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ user_id: userId, username: username })
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log("📦 Ответ от сервера:", data);
+
+      document.getElementById('points').textContent = `${data.points ?? 0} 💎`;
+      document.getElementById('progress-bar').style.width = `${Math.min((data.points / 20) * 100, 100)}%`;
+      document.getElementById('progress-text').textContent = `${data.points ?? 0} / 20`;
+
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '';
+      (data.history || []).forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry}`;
+        historyList.appendChild(li);
       });
 
-    document.getElementById('keyword-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const keyword = document.getElementById('keyword-input').value.trim();
-      if (!keyword) return;
-
-      fetch('/api/submit_keyword', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, keyword })
-      })
-      .then(res => res.json())
-      .then(result => {
-        alert(result.message);
-        location.reload();
+      const bonusesList = document.getElementById('bonuses-list');
+      bonusesList.innerHTML = '';
+      (data.bonuses || []).forEach(bonus => {
+        const li = document.createElement('li');
+        if (bonus.Доступен === 'да') {
+          li.innerHTML = `✨ <a href="${bonus['Содержание бонуса']}" class="text-blue-600 underline" target="_blank">${bonus['Тип бонуса']}</a>`;
+        } else {
+          li.innerHTML = `🔒 ${bonus['Тип бонуса']} (нужно ещё ${bonus.Недостает} баллов)`;
+        }
+        bonusesList.appendChild(li);
       });
+    })
+    .catch(err => {
+      console.error("❌ Ошибка при загрузке данных:", err);
     });
-  </script>
+
+  document.getElementById('keyword-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const keyword = document.getElementById('keyword-input').value.trim();
+    if (!keyword) return;
+
+    fetch('/api/submit_keyword', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, keyword })
+    })
+    .then(res => res.json())
+    .then(result => {
+      alert(result.message);
+      location.reload();
+    });
+  });
+</script>
+
 </body>
 </html>
