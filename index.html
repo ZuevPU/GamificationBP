@@ -69,12 +69,14 @@
     const username = user.username || user.first_name;
 
     document.getElementById('username').textContent = username;
-
-    fetch('https://script.google.com/macros/s/AKfycbxsWmjMEKQlsRaz-ELm3Qj70ryi4YJ9f4SVv3679CfGC4q9mqDjTJ5tRWJeY1s4bj2J/exec', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, username: username })
-    })
+fetch('https://script.google.com/macros/s/AKfycbxsWmjMEKQlsRaz-ELm3Qj70ryi4YJ9f4SVv3679CfGC4q9mqDjTJ5tRWJeY1s4bj2J/exec', {
+  method: 'POST',
+  mode: 'no-cors', // ← важно!
+  headers: {
+    'Content-Type': 'text/plain' // ← чтобы не срабатывал preflight-запрос
+  },
+  body: JSON.stringify({ user_id: userId, username: username })
+})
       .then(res => res.json())
       .then(data => {
         document.getElementById('points').textContent = `${data.points} 💎`;
