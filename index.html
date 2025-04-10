@@ -69,7 +69,7 @@
     const username = user.username || user.first_name;
 
     document.getElementById('username').textContent = username;
-fetch('https://script.google.com/macros/s/AKfycbxsWmjMEKQlsRaz-ELm3Qj70ryi4YJ9f4SVv3679CfGC4q9mqDjTJ5tRWJeY1s4bj2J/exec', {
+fetch('https://telegram-gamification-proxy.vercel.app/api/submit_user', {
   method: 'POST',
   mode: 'no-cors', // ← важно!
   headers: {
