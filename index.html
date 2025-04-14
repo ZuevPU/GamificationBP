@@ -21,18 +21,22 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow p-4 mb-4">
-      <h2 class="text-xl font-semibold mb-2">🎬 Получить мудрость за видео "Архетип наставника"</h2>
-      <form id="video-form" class="flex gap-2">
-        <input id="video-link" type="url" placeholder="Вставьте ссылку на видео" class="flex-grow border border-gray-300 rounded px-3 py-2 text-sm" required />
-        <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
+      <h2 class="text-xl font-semibold mb-2">🎮 Получить мудрость за видео "Архетип наставника"</h2>
+      <form id="video-form" class="space-y-2">
+        <input id="video-link" type="url" placeholder="Вставьте ссылку на видео"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required />
+        <button type="submit"
+          class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
       </form>
     </div>
 
     <div class="bg-white rounded-2xl shadow p-4 mb-4">
       <h2 class="text-xl font-semibold mb-2">🎭 Получить мудрость за театральный перфоманс</h2>
-      <form id="performance-form" class="flex gap-2">
-        <input id="performance-text" type="text" placeholder="Опишите ваш перфоманс" class="flex-grow border border-gray-300 rounded px-3 py-2 text-sm" required />
-        <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">Отправить</button>
+      <form id="performance-form" class="space-y-2">
+        <input id="performance-text" type="text" placeholder="Опишите ваш перфоманс"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required />
+        <button type="submit"
+          class="w-full bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">Отправить</button>
       </form>
     </div>
 
@@ -91,17 +95,17 @@
       bonusesList.innerHTML = '';
       (data.bonuses || []).forEach(bonus => {
         const li = document.createElement('li');
-        li.innerHTML = `🧾 <strong>${bonus['Тип бонуса']}</strong><br><span class="text-gray-700">${bonus['Содержание бонуса']}</span><br><em>Минимальная стоимость: ${bonus['Минимум баллов']} 🧠</em>`;
+        li.innerHTML = `📎 <strong>${bonus['Тип бонуса']}</strong><br><span class="text-gray-700">${bonus['Содержание бонуса']}</span><br><em>Минимальная стоимость: ${bonus['Минимум баллов']} 🧠</em>`;
         bonusesList.appendChild(li);
       });
-    }).catch(() => {});
+    });
 
     if (keyword) {
       fetch(`${API}/api/submit_keyword`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, keyword })
-      }).catch(() => {});
+      });
     }
 
     document.getElementById('video-form').addEventListener('submit', (e) => {
@@ -113,7 +117,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, username, url: link })
-      }).catch(() => {});
+      });
     });
 
     document.getElementById('performance-form').addEventListener('submit', (e) => {
@@ -125,7 +129,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, username, text })
-      }).catch(() => {});
+      });
     });
 
     fetch(`${API}/api/load_tasks`)
@@ -139,11 +143,11 @@
           block.className = 'bg-white rounded-2xl shadow p-4';
 
           block.innerHTML = `
-            <h2 class="text-xl font-semibold mb-2">🧩 ${task.title}</h2>
+            <h2 class="text-xl font-semibold mb-2">🤩 ${task.title}</h2>
             <p class="text-sm mb-2 text-gray-700">${task.description}</p>
-            <form class="flex gap-2 task-form">
-              <input type="url" name="url" placeholder="Ссылка на ответ" class="flex-grow border border-gray-300 rounded px-3 py-2 text-sm" required />
-              <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
+            <form class="space-y-2 task-form">
+              <input type="url" name="url" placeholder="Ссылка на ответ" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required />
+              <button type="submit" class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
             </form>
           `;
 
@@ -156,12 +160,12 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ user_id: userId, username, url, task: task.title })
-            }).catch(() => {});
+            });
           });
 
           container.appendChild(block);
         });
-      }).catch(() => {});
+      });
   </script>
 </body>
 </html>
