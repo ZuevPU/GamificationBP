@@ -100,12 +100,7 @@
       bonusesList.innerHTML = '';
       (data.bonuses || []).forEach(bonus => {
         const li = document.createElement('li');
-        if (bonus.Доступен === 'да') {
-          li.innerHTML = `✨ <a href="${bonus['Содержание бонуса']}" class="text-blue-600 underline" target="_blank">${bonus['Тип бонуса']}</a>`;
-          localStorage.setItem('bonus_' + bonus['Тип бонуса'], '1');
-        } else {
-          li.innerHTML = `🔒 ${bonus['Тип бонуса']} (ещё ${bonus.Недостает} 🧠)`;
-        }
+        li.innerHTML = `🧾 <strong>${bonus['Тип бонуса']}</strong><br><span class="text-gray-700">${bonus['Содержание бонуса']}</span><br><em>Минимальная стоимость: ${bonus['Минимум баллов']} 🧠</em>`;
         bonusesList.appendChild(li);
       });
     }).catch(() => {});
@@ -148,7 +143,7 @@
         const container = document.getElementById('tasks-container');
         container.innerHTML = '';
 
-        tasks.forEach((task, index) => {
+        (tasks || []).forEach(task => {
           const block = document.createElement('div');
           block.className = 'bg-white rounded-2xl shadow p-4';
 
