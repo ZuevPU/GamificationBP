@@ -102,23 +102,20 @@
         const li = document.createElement('li');
         if (bonus.Доступен === 'да') {
           li.innerHTML = `✨ <a href="${bonus['Содержание бонуса']}" class="text-blue-600 underline" target="_blank">${bonus['Тип бонуса']}</a>`;
-          if (!localStorage.getItem('bonus_' + bonus['Тип бонуса'])) {
-            alert(`🎉 Новый доступ к аукциону: ${bonus['Тип бонуса']}`);
-            localStorage.setItem('bonus_' + bonus['Тип бонуса'], '1');
-          }
+          localStorage.setItem('bonus_' + bonus['Тип бонуса'], '1');
         } else {
           li.innerHTML = `🔒 ${bonus['Тип бонуса']} (ещё ${bonus.Недостает} 🧠)`;
         }
         bonusesList.appendChild(li);
       });
-    });
+    }).catch(() => {});
 
     if (keyword) {
       fetch(`${API}/api/submit_keyword`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, keyword })
-      });
+      }).catch(() => {});
     }
 
     document.getElementById('video-form').addEventListener('submit', (e) => {
@@ -130,7 +127,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, username, url: link })
-      }).then(() => alert('Видео отправлено!'));
+      }).catch(() => {});
     });
 
     document.getElementById('performance-form').addEventListener('submit', (e) => {
@@ -142,10 +139,9 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, username, text })
-      }).then(() => alert('Перфоманс отправлен!'));
+      }).catch(() => {});
     });
 
-    // Задания со смыслом
     fetch(`${API}/api/load_tasks`)
       .then(res => res.json())
       .then(tasks => {
@@ -174,12 +170,12 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ user_id: userId, username, url, task: task.title })
-            }).then(() => alert('Ответ отправлен!'));
+            }).catch(() => {});
           });
 
           container.appendChild(block);
         });
-      });
+      }).catch(() => {});
   </script>
 </body>
 </html>
