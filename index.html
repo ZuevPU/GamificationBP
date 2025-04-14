@@ -9,19 +9,17 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
   <div class="max-w-xl mx-auto p-6">
-    <!-- Шапка -->
     <div class="text-center mb-6">
-      <h1 class="text-2xl font-bold">🎓 Инструмента наставника</h1>
-      <p class="text-sm text-gray-600">Система геймификации обучения</p>
+      <h1 class="text-2xl font-bold">🧙‍♀️ Инструмент сказочной мудрости</h1>
+      <p class="text-sm text-gray-600">Цифровая система смыслов и чудес</p>
     </div>
 
-    <!-- Профиль -->
     <div class="bg-white rounded-2xl shadow p-4 mb-4">
       <h2 class="text-xl font-semibold mb-2">👤 Профиль участника</h2>
       <p><strong>Имя:</strong> <span id="username">–</span></p>
-      <p><strong>Баллы:</strong> <span id="points" class="text-green-600 font-bold">…</span></p>
+      <p><strong>Мудрость:</strong> <span id="points" class="text-green-600 font-bold">…</span></p>
       <div class="mt-3">
-        <label class="block text-sm text-gray-700 mb-1">Прогресс до награды:</label>
+        <label class="block text-sm text-gray-700 mb-1">Путь к аукциону:</label>
         <div class="w-full bg-gray-200 rounded-full h-3">
           <div id="progress-bar" class="bg-green-500 h-3 rounded-full" style="width: 0%"></div>
         </div>
@@ -29,32 +27,38 @@
       </div>
     </div>
 
-    <!-- История действий -->
     <div class="bg-white rounded-2xl shadow p-4 mb-4">
-      <h2 class="text-xl font-semibold mb-2">📜 История баллов</h2>
+      <h2 class="text-xl font-semibold mb-2">🎬 Получить мудрость за видео "Архетип наставника"</h2>
+      <form id="video-form" class="flex gap-2">
+        <input id="video-link" type="url" placeholder="Вставьте ссылку на видео" class="flex-grow border border-gray-300 rounded px-3 py-2 text-sm" required />
+        <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
+      </form>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-4 mb-4">
+      <h2 class="text-xl font-semibold mb-2">🎭 Получить мудрость за театральный перфоманс</h2>
+      <form id="performance-form" class="flex gap-2">
+        <input id="performance-text" type="text" placeholder="Опишите ваш перфоманс" class="flex-grow border border-gray-300 rounded px-3 py-2 text-sm" required />
+        <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">Отправить</button>
+      </form>
+    </div>
+
+    <div id="tasks-container" class="space-y-4 mb-4"></div>
+
+    <div class="bg-white rounded-2xl shadow p-4 mt-4">
+      <h2 class="text-xl font-semibold mb-2">📜 История мудростей</h2>
       <ul id="history-list" class="text-sm list-disc pl-4">
         <li>Загрузка истории...</li>
       </ul>
     </div>
 
-    <!-- Ввод кодового слова -->
-    <div class="bg-white rounded-2xl shadow p-4 mb-4">
-      <h2 class="text-xl font-semibold mb-2">🔑 Введите кодовое слово</h2>
-      <form id="keyword-form" class="flex gap-2">
-        <input id="keyword-input" type="text" placeholder="#знаниесила" class="flex-grow border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none" />
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">Отправить</button>
-      </form>
-    </div>
-
-    <!-- Доступные бонусы -->
-    <div class="bg-white rounded-2xl shadow p-4">
-      <h2 class="text-xl font-semibold mb-2">🎁 Доступные бонусы</h2>
+    <div class="bg-white rounded-2xl shadow p-4 mt-4">
+      <h2 class="text-xl font-semibold mb-2">🪄 Доступ к аукциону</h2>
       <ul id="bonuses-list" class="text-sm space-y-2">
-        <li>Загрузка бонусов...</li>
+        <li>Загрузка...</li>
       </ul>
     </div>
 
-    <!-- Футер -->
     <div class="text-center text-xs text-gray-500 mt-6">
       Большая перемена © 2025
     </div>
@@ -65,25 +69,22 @@
     tg.ready();
 
     const user = tg.initDataUnsafe.user;
-    const keyword = tg.initDataUnsafe.start_param; // ← QR-параметр
-
     const userId = user?.id;
     const username = user?.username || user?.first_name || "Без имени";
-
-    console.log("🧾 user_id:", userId);
-    console.log("🧾 username:", username);
-    console.log("🏷️ start_param (keyword):", keyword);
+    const keyword = tg.initDataUnsafe.start_param;
 
     document.getElementById('username').textContent = username;
 
-    fetch('https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app/api/submit_user', {
+    const API = 'https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app';
+
+    fetch(`${API}/api/submit_user`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, username: username })
+      body: JSON.stringify({ user_id: userId, username })
     })
     .then(res => res.json())
     .then(data => {
-      document.getElementById('points').textContent = `${data.points ?? 0} 💎`;
+      document.getElementById('points').textContent = `${data.points ?? 0} 🧠`;
       document.getElementById('progress-bar').style.width = `${Math.min((data.points / 20) * 100, 100)}%`;
       document.getElementById('progress-text').textContent = `${data.points ?? 0} / 20`;
 
@@ -101,44 +102,84 @@
         const li = document.createElement('li');
         if (bonus.Доступен === 'да') {
           li.innerHTML = `✨ <a href="${bonus['Содержание бонуса']}" class="text-blue-600 underline" target="_blank">${bonus['Тип бонуса']}</a>`;
+          if (!localStorage.getItem('bonus_' + bonus['Тип бонуса'])) {
+            alert(`🎉 Новый доступ к аукциону: ${bonus['Тип бонуса']}`);
+            localStorage.setItem('bonus_' + bonus['Тип бонуса'], '1');
+          }
         } else {
-          li.innerHTML = `🔒 ${bonus['Тип бонуса']} (нужно ещё ${bonus.Недостает} баллов)`;
+          li.innerHTML = `🔒 ${bonus['Тип бонуса']} (ещё ${bonus.Недостает} 🧠)`;
         }
         bonusesList.appendChild(li);
       });
     });
 
-    // Отправка keyword из QR или deeplink
     if (keyword) {
-      fetch('https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app/api/submit_keyword', {
+      fetch(`${API}/api/submit_keyword`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ user_id: userId, keyword: keyword })
-      })
-      .then(res => res.json())
-      .then(data => {
-        console.log("🎯 Ответ по keyword:", data);
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, keyword })
       });
     }
 
-    document.getElementById('keyword-form').addEventListener('submit', (e) => {
+    document.getElementById('video-form').addEventListener('submit', (e) => {
       e.preventDefault();
-      const manualKeyword = document.getElementById('keyword-input').value.trim();
-      if (!manualKeyword) return;
+      const link = document.getElementById('video-link').value.trim();
+      if (!link) return;
 
-      fetch('https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app/api/submit_keyword', {
+      fetch(`${API}/api/submit_video`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, keyword: manualKeyword })
-      })
-      .then(res => res.json())
-      .then(result => {
-        alert(result.message || "Баллы начислены!");
-        location.reload();
-      });
+        body: JSON.stringify({ user_id: userId, username, url: link })
+      }).then(() => alert('Видео отправлено!'));
     });
+
+    document.getElementById('performance-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = document.getElementById('performance-text').value.trim();
+      if (!text) return;
+
+      fetch(`${API}/api/submit_performance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, username, text })
+      }).then(() => alert('Перфоманс отправлен!'));
+    });
+
+    // Задания со смыслом
+    fetch(`${API}/api/load_tasks`)
+      .then(res => res.json())
+      .then(tasks => {
+        const container = document.getElementById('tasks-container');
+        container.innerHTML = '';
+
+        tasks.forEach((task, index) => {
+          const block = document.createElement('div');
+          block.className = 'bg-white rounded-2xl shadow p-4';
+
+          block.innerHTML = `
+            <h2 class="text-xl font-semibold mb-2">🧩 ${task.title}</h2>
+            <p class="text-sm mb-2 text-gray-700">${task.description}</p>
+            <form class="flex gap-2 task-form">
+              <input type="url" name="url" placeholder="Ссылка на ответ" class="flex-grow border border-gray-300 rounded px-3 py-2 text-sm" required />
+              <button type="submit" class="bg-emerald-500 text-white px-4 py-2 rounded hover:bg-emerald-600 text-sm">Отправить</button>
+            </form>
+          `;
+
+          block.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const url = e.target.url.value.trim();
+            if (!url) return;
+
+            fetch(`${API}/api/submit_task_response`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ user_id: userId, username, url, task: task.title })
+            }).then(() => alert('Ответ отправлен!'));
+          });
+
+          container.appendChild(block);
+        });
+      });
   </script>
 </body>
 </html>
