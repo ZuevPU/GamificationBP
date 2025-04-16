@@ -61,7 +61,7 @@
     </div>
   </div>
 
-  <script>
+<script>
   const tg = window.Telegram.WebApp;
   tg.ready();
 
@@ -83,39 +83,25 @@
     })
     .then(res => res.json())
     .then(data => {
-      // Обновляем количество очков
       document.getElementById('points').textContent = `${data.points ?? 0} 🧠`;
 
-      // Обновляем историю (новый формат с галочками)
+      // Обработка истории - теперь только галочки
       const historyList = document.getElementById('history-list');
       historyList.innerHTML = '';
       
       if (!data.history || data.history.length === 0) {
         historyList.innerHTML = '<li class="text-gray-500">История пуста</li>';
       } else {
-        data.history.forEach(entry => {
+        // Просто выводим по одной галочке на каждую запись
+        data.history.forEach(() => {
           const li = document.createElement('li');
-          li.className = 'flex items-center';
-          
-          // Форматируем дату (предполагаем, что entry содержит поле date)
-          const eventDate = entry.date ? new Date(entry.date) : new Date();
-          const formattedDate = `
-            ${eventDate.getDate().toString().padStart(2, '0')}.
-            ${(eventDate.getMonth()+1).toString().padStart(2, '0')}.
-            ${eventDate.getFullYear()} 
-            ${eventDate.getHours().toString().padStart(2, '0')}:
-            ${eventDate.getMinutes().toString().padStart(2, '0')}
-          `;
-          
-          li.innerHTML = `
-            <span class="text-green-500 mr-2">✅</span>
-            <span class="text-gray-700">${formattedDate}</span>
-          `;
+          li.className = 'text-green-500 text-xl';
+          li.textContent = '🧠';
           historyList.appendChild(li);
         });
       }
 
-      // Обновляем бонусы (оставляем как было)
+      // Остальной код для бонусов...
       const bonusesList = document.getElementById('bonuses-list');
       bonusesList.innerHTML = '';
       (data.bonuses || []).forEach(bonus => {
@@ -129,7 +115,7 @@
     });
   }
 
-  // Отправка ключевого слова (если есть)
+  // Остальной код остается без изменений...
   if (keyword) {
     fetch(`${API}/api/submit_keyword`, {
       method: 'POST',
@@ -138,7 +124,6 @@
     });
   }
 
-  // Обработка формы видео
   document.getElementById('video-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const link = document.getElementById('video-link').value.trim();
@@ -150,13 +135,11 @@
       body: JSON.stringify({ user_id: userId, username, url: link })
     })
     .then(() => {
-      // После отправки обновляем данные
       loadUserData();
-      document.getElementById('video-link').value = ''; // Очищаем поле
+      document.getElementById('video-link').value = '';
     });
   });
 
-  // Обработка формы перфоманса
   document.getElementById('performance-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const text = document.getElementById('performance-text').value.trim();
@@ -173,7 +156,6 @@
     });
   });
 
-  // Загрузка задач
   fetch(`${API}/api/load_tasks`)
     .then(res => res.json())
     .then(tasks => {
@@ -213,7 +195,6 @@
       });
     });
 
-  // Первоначальная загрузка данных
   loadUserData();
 </script>
 </body>
