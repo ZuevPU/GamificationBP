@@ -14,6 +14,11 @@
       <p class="text-sm text-gray-600">Цифровая система смыслов и чудес</p>
     </div>
 
+    <div id="team-box" class="bg-white rounded-2xl shadow p-4 mb-4 hidden">
+      <h2 class="text-xl font-semibold mb-2">🏆 Команда: <span id="team-name">–</span></h2>
+      <p><strong>Сказочная мудрость:</strong> <span id="team-points" class="text-blue-600 font-bold">–</span></p>
+    </div>
+
     <div class="bg-white rounded-2xl shadow p-4 mb-4">
       <h2 class="text-xl font-semibold mb-2">👤 Профиль участника</h2>
       <p><strong>Имя:</strong> <span id="username">–</span></p>
@@ -79,6 +84,13 @@
     .then(res => res.json())
     .then(data => {
       document.getElementById('points').textContent = `${data.points ?? 0} 🧠`;
+
+      if (data.team) {
+        document.getElementById('team-box').classList.remove('hidden');
+        document.getElementById('team-name').textContent = data.team;
+        document.getElementById('team-points').textContent = `${data.team_points} 🧠`;
+      }
+
       const historyList = document.getElementById('history-list');
       historyList.innerHTML = '';
       if (!data.history || data.history.length === 0) {
@@ -169,8 +181,8 @@
         container.appendChild(block);
       });
     });
+
   loadUserData();
 </script>
 </body>
 </html>
-
