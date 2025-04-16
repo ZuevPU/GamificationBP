@@ -93,12 +93,16 @@
         historyList.innerHTML = '<li class="text-gray-500">История пуста</li>';
       } else {
         // Просто выводим по одной галочке на каждую запись
-        data.history.forEach(() => {
-          const li = document.createElement('li');
-          li.className = 'text-green-500 text-xl';
-          li.textContent = '🧠';
-          historyList.appendChild(li);
-        });
+// Создаем строку с галочками
+if (data.history && data.history.length > 0) {
+  const stars = '✨ '.repeat(data.history.length).trim(); // Создаем строку с нужным количеством галочек
+  const li = document.createElement('li');
+  li.className = 'text-green-500 text-xl';
+  li.textContent = stars; // Выводим все галочки в одну строку
+  historyList.appendChild(li);
+} else {
+  historyList.innerHTML = '<li class="text-gray-500">История пуста</li>';
+}
       }
 
       // Остальной код для бонусов...
