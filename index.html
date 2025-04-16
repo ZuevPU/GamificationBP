@@ -85,12 +85,12 @@
     .then(data => {
       document.getElementById('points').textContent = `${data.points ?? 0} 🧠`;
 
-      if (data.team) {
+
 document.getElementById('team-box').classList.remove('hidden');
 document.getElementById('team-name').textContent = data.team || '–';
 document.getElementById('team-points').textContent = `${data.team_points ?? '–'} 🧠`;
 
-      }
+
 
       const historyList = document.getElementById('history-list');
       historyList.innerHTML = '';
