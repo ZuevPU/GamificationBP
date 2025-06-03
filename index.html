@@ -1,189 +1,195 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Инструмент наставника</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Инструмент наставника</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-gray-100 text-gray-900">
-  <div class="max-w-xl mx-auto p-6">
-    <div class="text-center mb-6">
-      <h1 class="text-2xl font-bold">🧙‍♀️ Инструмент сказочной мудрости</h1>
-      <p class="text-sm text-gray-600">Цифровая система смыслов и чудес</p>
+    <div class="max-w-xl mx-auto p-6">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold">🧙‍♀️ Инструмент сказочной мудрости</h1>
+            <p class="text-sm text-gray-600">Цифровая система смыслов и чудес</p>
+        </div>
+
+
+
+        <div class="bg-white rounded-2xl shadow p-4 mb-4">
+            <h2 class="text-xl font-semibold mb-2">👤 Профиль участника</h2>
+            <p><strong>Имя:</strong> <span id="username">–</span></p>
+            <p><strong>Сказочная мудрость:</strong> <span id="points" class="text-green-600 font-bold">…</span></p>
+        </div>
+        <div id="team-box" class="bg-white rounded-2xl shadow p-4 mb-4">
+            <h2 class="text-xl font-semibold mb-2">🏆 Команда: <span id="team-name">–</span></h2>
+            <p><strong>Сказочная мудрость:</strong> <span id="team-points" class="text-blue-600 font-bold">–</span></p>
+        </div>
+
+        <div id="tasks-container" class="space-y-4 mb-4"></div>
+
+     
+        <!--    <div class="bg-white rounded-2xl shadow p-4 mb-4">
+            <h2 class="text-xl font-semibold mb-2">🎮 Получить мудрость за видео "Архетип наставника"</h2>
+            <form id="video-form" class="space-y-2">
+                <input id="video-link" type="url" placeholder="Вставьте ссылку на видео"
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required />
+                <button type="submit"
+                    class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-4 mb-4">
+            <h2 class="text-xl font-semibold mb-2">🎭 Получить мудрость за театральный перфоманс</h2>
+            <form id="performance-form" class="space-y-2">
+                <input id="performance-text" type="text" placeholder="Опишите ваш перфоманс"
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required />
+                <button type="submit"
+                    class="w-full bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">Отправить</button>
+            </form>
+        </div>
+
+       
+   <div class="bg-white rounded-2xl shadow p-4 mt-4">
+            <h2 class="text-xl font-semibold mb-2">📜 История мудростей</h2>
+            <ul id="history-list" class="text-sm space-y-2">
+                <li>Загрузка истории...</li>
+            </ul>
+        </div>-->
+
+        <div class="bg-white rounded-2xl shadow p-4 mt-4">
+            <h2 class="text-xl font-semibold mb-2">🪄 Доступ к аукциону</h2>
+            <ul id="bonuses-list" class="text-sm space-y-2">
+                <li>Загрузка...</li>
+            </ul>
+        </div>
+
+        <div class="text-center text-xs text-gray-500 mt-6">
+            Большая перемена © 2025
+        </div>
     </div>
 
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        const user = tg.initDataUnsafe.user;
+        const userId = user?.id;
+        const username = user?.username || user?.first_name || "Без имени";
+        const keyword = tg.initDataUnsafe.start_param;
+        document.getElementById('username').textContent = username;
+        const API = 'https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app';
+
+        function loadUserData() {
+            fetch(`${API}/api/submit_user`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, username })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('points').textContent = `${data.points ?? 0} 🧠`;
 
 
-    <div class="bg-white rounded-2xl shadow p-4 mb-4">
-      <h2 class="text-xl font-semibold mb-2">👤 Профиль участника</h2>
-      <p><strong>Имя:</strong> <span id="username">–</span></p>
-      <p><strong>Сказочная мудрость:</strong> <span id="points" class="text-green-600 font-bold">…</span></p>
-    </div>
-    <div id="team-box" class="bg-white rounded-2xl shadow p-4 mb-4">
-      <h2 class="text-xl font-semibold mb-2">🏆 Команда: <span id="team-name">–</span></h2>
-      <p><strong>Сказочная мудрость:</strong> <span id="team-points" class="text-blue-600 font-bold">–</span></p>
-    </div>
-   <!-- <div class="bg-white rounded-2xl shadow p-4 mb-4">
-      <h2 class="text-xl font-semibold mb-2">🎮 Получить мудрость за видео "Архетип наставника"</h2>
-      <form id="video-form" class="space-y-2">
-        <input id="video-link" type="url" placeholder="Вставьте ссылку на видео"
-          class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required />
-        <button type="submit"
-          class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
-      </form>
-    </div>
-
-    <div class="bg-white rounded-2xl shadow p-4 mb-4">
-      <h2 class="text-xl font-semibold mb-2">🎭 Получить мудрость за театральный перфоманс</h2>
-      <form id="performance-form" class="space-y-2">
-        <input id="performance-text" type="text" placeholder="Опишите ваш перфоманс"
-          class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required />
-        <button type="submit"
-          class="w-full bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">Отправить</button>
-      </form>
-    </div>
-
-    
-
-    <div class="bg-white rounded-2xl shadow p-4 mt-4">
-      <h2 class="text-xl font-semibold mb-2">📜 История мудростей</h2>
-      <ul id="history-list" class="text-sm space-y-2">
-        <li>Загрузка истории...</li>
-      </ul>
-    </div>-->
-<div id="tasks-container" class="space-y-4 mb-4"></div>
-    <div class="bg-white rounded-2xl shadow p-4 mt-4">
-      <h2 class="text-xl font-semibold mb-2">🪄 Доступ к аукциону</h2>
-      <ul id="bonuses-list" class="text-sm space-y-2">
-        <li>Загрузка...</li>
-      </ul>
-    </div>
-
-    <div class="text-center text-xs text-gray-500 mt-6">
-      Большая перемена © 2025
-    </div>
-  </div>
-
-<script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-  const user = tg.initDataUnsafe.user;
-  const userId = user?.id;
-  const username = user?.username || user?.first_name || "Без имени";
-  const keyword = tg.initDataUnsafe.start_param;
-  document.getElementById('username').textContent = username;
-  const API = 'https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app';
-
-  function loadUserData() {
-    fetch(`${API}/api/submit_user`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, username })
-    })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('points').textContent = `${data.points ?? 0} 🧠`;
-
-
-document.getElementById('team-box').classList.remove('hidden');
-document.getElementById('team-name').textContent = data.team || '–';
-document.getElementById('team-points').textContent = `${data.team_points ?? '–'} 🧠`;
+                    document.getElementById('team-box').classList.remove('hidden');
+                    document.getElementById('team-name').textContent = data.team || '–';
+                    document.getElementById('team-points').textContent = `${data.team_points ?? '–'} 🧠`;
 
 
 
-      const historyList = document.getElementById('history-list');
-      historyList.innerHTML = '';
-      if (!data.history || data.history.length === 0) {
-        historyList.innerHTML = '<li class="text-gray-500">История пуста</li>';
-      } else {
-        const stars = '🧠 '.repeat(data.history.length).trim();
-        const li = document.createElement('li');
-        li.className = 'text-green-500 text-xl';
-        li.textContent = stars;
-        historyList.appendChild(li);
-      }
-      const bonusesList = document.getElementById('bonuses-list');
-      bonusesList.innerHTML = '';
-      (data.bonuses || []).forEach(bonus => {
-        const li = document.createElement('li');
-        li.innerHTML = `📎 <strong>${bonus['Тип бонуса']}</strong><br><span class="text-gray-700">${bonus['Содержание бонуса']}</span><br><em>Минимальная стоимость: ${bonus['Минимум баллов']} 🧠</em>`;
-        bonusesList.appendChild(li);
-      });
-    });
-  }
+                    const historyList = document.getElementById('history-list');
+                    historyList.innerHTML = '';
+                    if (!data.history || data.history.length === 0) {
+                        historyList.innerHTML = '<li class="text-gray-500">История пуста</li>';
+                    } else {
+                        const stars = '🧠 '.repeat(data.history.length).trim();
+                        const li = document.createElement('li');
+                        li.className = 'text-green-500 text-xl';
+                        li.textContent = stars;
+                        historyList.appendChild(li);
+                    }
+                    const bonusesList = document.getElementById('bonuses-list');
+                    bonusesList.innerHTML = '';
+                    (data.bonuses || []).forEach(bonus => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `📎 <strong>${bonus['Тип бонуса']}</strong><br><span class="text-gray-700">${bonus['Содержание бонуса']}</span><br><em>Минимальная стоимость: ${bonus['Минимум баллов']} 🧠</em>`;
+                        bonusesList.appendChild(li);
+                    });
+                });
+        }
 
-  if (keyword) {
-    fetch(`${API}/api/submit_keyword`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, keyword })
-    });
-  }
+        if (keyword) {
+            fetch(`${API}/api/submit_keyword`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, keyword })
+            });
+        }
 
-  document.getElementById('video-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const link = document.getElementById('video-link').value.trim();
-    if (!link) return;
-    fetch(`${API}/api/submit_video`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, username, url: link })
-    })
-    .then(() => {
-      alert("Спасибо! Мудрость получена.");
-      loadUserData();
-      document.getElementById('video-link').value = '';
-    });
-  });
+      /*  document.getElementById('video-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const link = document.getElementById('video-link').value.trim();
+            if (!link) return;
+            fetch(`${API}/api/submit_video`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, username, url: link })
+            })
+                .then(() => {
+                    alert("Спасибо! Мудрость получена.");
+                    loadUserData();
+                    document.getElementById('video-link').value = '';
+                });
+        });
 
-  document.getElementById('performance-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const text = document.getElementById('performance-text').value.trim();
-    if (!text) return;
-    fetch(`${API}/api/submit_performance`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, username, text })
-    })
-    .then(() => {
-      alert("Спасибо! Мудрость получена.");
-      loadUserData();
-      document.getElementById('performance-text').value = '';
-    });
-  });
+        document.getElementById('performance-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = document.getElementById('performance-text').value.trim();
+            if (!text) return;
+            fetch(`${API}/api/submit_performance`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, username, text })
+            })
+                .then(() => {
+                    alert("Спасибо! Мудрость получена.");
+                    loadUserData();
+                    document.getElementById('performance-text').value = '';
+                });
+        }); */
 
-  fetch(`${API}/api/load_tasks`)
-    .then(res => res.json())
-    .then(tasks => {
-      const container = document.getElementById('tasks-container');
-      container.innerHTML = '';
-      (tasks || []).forEach(task => {
-        const block = document.createElement('div');
-        block.className = 'bg-white rounded-2xl shadow p-4';
-        block.innerHTML = `
+        fetch(`${API}/api/load_tasks`)
+            .then(res => res.json())
+            .then(tasks => {
+                const container = document.getElementById('tasks-container');
+                container.innerHTML = '';
+                (tasks || []).forEach(task => {
+                    const block = document.createElement('div');
+                    block.className = 'bg-white rounded-2xl shadow p-4';
+                    block.innerHTML = `
           <h2 class="text-xl font-semibold mb-2">🤩 ${task.title}</h2>
           <p class="text-sm mb-2 text-gray-700">${task.description}</p>
           <form class="space-y-2 task-form">
             <input type="url" name="url" placeholder="Ссылка на ответ" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required />
             <button type="submit" class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
           </form>`;
-        block.querySelector('form').addEventListener('submit', (e) => {
-          e.preventDefault();
-          const url = e.target.url.value.trim();
-          if (!url) return;
-          fetch(`${API}/api/submit_task_response`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: userId, username, url, task: task.title })
-          })
-          .then(() => {
-            alert("Спасибо! Мудрость получена.");
-            loadUserData();
-            e.target.url.value = '';
-          });
-        });
-        container.appendChild(block);
-      });
-    });
+                    block.querySelector('form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const url = e.target.url.value.trim();
+                        if (!url) return;
+                        fetch(`${API}/api/submit_task_response`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ user_id: userId, username, url, task: task.title })
+                        })
+                            .then(() => {
+                                alert("Спасибо! Мудрость получена.");
+                                loadUserData();
+                                e.target.url.value = '';
+                            });
+                    });
+                    container.appendChild(block);
+                });
+            });
 
-  loadUserData();
-</script>
+        loadUserData();
+    </script>
 </body>
+
 </html>
