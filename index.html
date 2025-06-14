@@ -1,381 +1,195 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Инструмент наставника</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        /* Дополнительные стили для лотов, если Tailwind не покрывает все */
-        .lot-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
-        }
-
-        .lot-item {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .lot-item img {
-            max-width: 100%;
-            height: 180px; /* Фиксированная высота для изображений */
-            object-fit: cover; /* Обрезка изображения для заполнения контейнера */
-            border-radius: 0.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .message-area {
-            display: none; /* Скрываем по умолчанию */
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .message-area.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .message-area.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .message-area.info {
-            background-color: #cce5ff;
-            color: #004085;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Инструмент наставника</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
-
 <body class="bg-gray-100 text-gray-900">
-    <div class="max-w-xl mx-auto p-6">
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold">🧙‍♀️ Инструмент сказочной мудрости</h1>
-            <p class="text-sm text-gray-600">Цифровая система смыслов и чудес</p>
-        </div>
+  <div class="max-w-xl mx-auto p-6 space-y-6">
+    <!-- Заголовок -->
+    <header class="text-center">
+      <h1 class="text-2xl font-bold">🧙‍♀️ Инструмент сказочной мудрости</h1>
+      <p class="text-sm text-gray-600">Цифровая система смыслов и чудес</p>
+    </header>
 
-        <div class="bg-white rounded-2xl shadow p-4 mb-4">
-            <h2 class="text-xl font-semibold mb-2">👤 Профиль участника</h2>
-            <p><strong>Имя:</strong> <span id="username">–</span></p>
-            <p><strong>Сказочная мудрость:</strong> <span id="points" class="text-green-600 font-bold">…</span></p>
-        </div>
-        <div id="team-box" class="bg-white rounded-2xl shadow p-4 mb-4">
-            <h2 class="text-xl font-semibold mb-2">🏆 Команда: <span id="team-name">–</span></h2>
-            <p><strong>Сказочная мудрость:</strong> <span id="team-points" class="text-blue-600 font-bold">–</span></p>
-        </div>
+    <!-- Профиль -->
+    <section class="bg-white rounded-2xl shadow p-4">
+      <h2 class="text-xl font-semibold mb-2">👤 Профиль участника</h2>
+      <p><strong>Имя:</strong> <span id="username">–</span></p>
+      <p><strong>Сказочная мудрость:</strong> <span id="points" class="text-green-600 font-bold">…</span></p>
+    </section>
 
-        <div id="message-area" class="message-area"></div>
+    <!-- Команда -->
+    <section id="team-box" class="bg-white rounded-2xl shadow p-4">
+      <h2 class="text-xl font-semibold mb-2">🏆 Команда: <span id="team-name">–</span></h2>
+      <p><strong>Сказочная мудрость:</strong> <span id="team-points" class="text-blue-600 font-bold">–</span></p>
+    </section>
 
-        <div id="tasks-container" class="space-y-4 mb-4"></div>
+    <!-- Сообщения -->
+    <div id="message-area" class="hidden p-4 text-sm font-bold text-center rounded-lg"></div>
 
-        <div class="bg-white rounded-2xl shadow p-4 mt-4">
-            <h2 class="text-xl font-semibold mb-2">💰 Магазин артефактов (Аукцион)</h2>
-            <div id="lots-display" class="lot-grid">
-                <p class="text-gray-500 col-span-full" id="loading-lots-text">Загрузка лотов...</p>
-            </div>
-        </div>
+    <!-- Задания -->
+    <div id="tasks-container" class="space-y-4"></div>
 
-        <div class="text-center text-xs text-gray-500 mt-6">
-            Большая перемена © 2025
-        </div>
-    </div>
+    <!-- Аукцион -->
+    <section class="bg-white rounded-2xl shadow p-4">
+      <h2 class="text-xl font-semibold mb-2">💰 Магазин артефактов (Аукцион)</h2>
+      <div id="lots-display" class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+        <p id="loading-lots-text" class="text-gray-500 col-span-full">Загрузка лотов...</p>
+      </div>
+    </section>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-tg.ready();
-const user = tg.initDataUnsafe.user;
-const userId = user?.id;
-const username = user?.username || user?.first_name || "Без имени";
-const keyword = tg.initDataUnsafe.start_param;
+    <!-- Футер -->
+    <footer class="text-center text-xs text-gray-500 mt-6">Большая перемена © 2025</footer>
+  </div>
 
-document.getElementById('username').textContent = username;
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    const user = tg.initDataUnsafe.user;
+    const userId = user?.id;
+    const username = user?.username || user?.first_name || "Без имени";
+    const keyword = tg.initDataUnsafe.start_param;
+    const PROXY_API_URL = 'https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app';
 
-// !!! ВАЖНО: Замените этот URL на URL вашего Vercel-прокси
-const PROXY_API_URL = 'https://telegram-gamification-proxy-git-main-mashuks-projects-27504670.vercel.app';
+    // UI элементы
+    const pointsDisplay = document.getElementById('points');
+    const teamNameDisplay = document.getElementById('team-name');
+    const teamPointsDisplay = document.getElementById('team-points');
+    const lotsDisplay = document.getElementById('lots-display');
+    const loadingLotsText = document.getElementById('loading-lots-text');
+    const messageArea = document.getElementById('message-area');
+    const tasksContainer = document.getElementById('tasks-container');
+    document.getElementById('username').textContent = username;
 
-// Элементы UI для быстрого доступа
-const pointsDisplay = document.getElementById('points');
-const teamNameDisplay = document.getElementById('team-name');
-const teamPointsDisplay = document.getElementById('team-points');
-const lotsDisplay = document.getElementById('lots-display');
-const loadingLotsText = document.getElementById('loading-lots-text');
-const messageArea = document.getElementById('message-area');
-const tasksContainer = document.getElementById('tasks-container');
-
-/**
- * Универсальная функция для отправки POST-запросов к прокси-серверу.
- * @param {string} endpoint - Конечная точка API на прокси (например, 'submit_user', 'buy_lot').
- * @param {object} payload - Объект с данными для отправки.
- * @returns {Promise<object>} - Промис, разрешающийся с JSON-ответом от сервера.
- */
-async function sendPostRequest(endpoint, payload) {
-    const url = `${PROXY_API_URL}/api/${endpoint}`;
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json', // Важно: для Vercel-прокси может быть application/json
-            },
-            body: JSON.stringify(payload),
+    async function sendPost(endpoint, payload) {
+      try {
+        const res = await fetch(`${PROXY_API_URL}/api/${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-
-        if (!response.ok) {
-            // Пытаемся прочитать ошибку из ответа, если это JSON
-            const errorData = await response.json().catch(() => ({ message: response.statusText }));
-            throw new Error(`HTTP error! Status: ${response.status}. Message: ${errorData.message || 'Неизвестная ошибка.'}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error(`Ошибка при отправке запроса к ${endpoint}:`, error);
-        showMessage(`Ошибка: ${error.message}`, 'error');
-        return { error: error.message };
+        if (!res.ok) throw new Error(await res.text());
+        return await res.json();
+      } catch (err) {
+        showMessage(`Ошибка: ${err.message}`, 'error');
+        return { error: err.message };
+      }
     }
-}
 
-/**
- * Загружает данные пользователя (баллы, команду, историю) и лоты из магазина.
- */
-async function loadUserData() {
-    showMessage('', ''); // Скрыть предыдущие сообщения
-    loadingLotsText.style.display = 'block'; // Показать "Загрузка лотов..."
-    lotsDisplay.innerHTML = '<p class="text-gray-500 col-span-full" id="loading-lots-text">Загрузка лотов...</p>'; // Очистить и показать заглушку
-
-    const data = {
-        user_id: userId,
-        username: username
-    };
-
-    const response = await sendPostRequest('submit_user', data);
-
-    loadingLotsText.style.display = 'none'; // Скрыть "Загрузка лотов..."
-
-    if (response && !response.error) {
-        pointsDisplay.textContent = `${response.points ?? 0} 🧠`;
-        teamNameDisplay.textContent = response.team || '–';
-        teamPointsDisplay.textContent = `${response.team_points ?? '–'} 🧠`;
-
-        // Обновление списка лотов
-        displayLots(response.bonuses || [], response.points);
-
-        // История (ваш старый код, если хотите его вернуть, он был закомментирован в HTML)
-        // const historyList = document.getElementById('history-list');
-        // if (historyList) { // Проверяем, существует ли элемент, если вы его раскомментируете
-        //     historyList.innerHTML = '';
-        //     if (!response.history || response.history.length === 0) {
-        //         historyList.innerHTML = '<li class="text-gray-500">История пуста</li>';
-        //     } else {
-        //         // Если вы хотите отображать реальную историю, а не просто количество звезд:
-        //         // (response.history || []).forEach(item => {
-        //         //     const li = document.createElement('li');
-        //         //     li.className = 'text-gray-700';
-        //         //     li.textContent = item;
-        //         //     historyList.appendChild(li);
-        //         // });
-        //         // Или как у вас было:
-        //         const stars = '🧠 '.repeat(response.history.length).trim();
-        //         const li = document.createElement('li');
-        //         li.className = 'text-green-500 text-xl';
-        //         li.textContent = stars;
-        //         historyList.appendChild(li);
-        //     }
-        // }
-
-
-    } else {
-        console.error('Ошибка при загрузке данных пользователя:', response.error);
-        showMessage('Не удалось загрузить данные пользователя и лоты.', 'error');
-        lotsDisplay.innerHTML = '<p class="text-gray-500 col-span-full">Не удалось загрузить лоты. Попробуйте позже.</p>';
+    function showMessage(msg, type) {
+      const colors = {
+        success: 'bg-green-100 text-green-800',
+        error: 'bg-red-100 text-red-800',
+        info: 'bg-blue-100 text-blue-800'
+      };
+      messageArea.textContent = msg;
+      messageArea.className = `block p-4 rounded-lg font-bold text-center ${colors[type] || ''}`;
+      if (!msg) messageArea.classList.add('hidden');
+      if (type !== 'info') setTimeout(() => messageArea.classList.add('hidden'), 5000);
     }
-}
 
-/**
- * Отображает список лотов в интерфейсе.
- * @param {Array<object>} lots - Массив объектов лотов (бонусов).
- * @param {number} userPoints - Текущие баллы пользователя.
- */
-function displayLots(lots, userPoints) {
-    lotsDisplay.innerHTML = ''; // Очищаем текущее содержимое
+    async function loadUserData() {
+      lotsDisplay.innerHTML = '<p class="text-gray-500 col-span-full">Загрузка лотов...</p>';
+      const res = await sendPost('submit_user', { user_id: userId, username });
 
-    if (lots.length === 0) {
-        lotsDisplay.innerHTML = '<p class="text-gray-500 col-span-full">Нет доступных артефактов для обмена.</p>';
+      if (!res.error) {
+        pointsDisplay.textContent = `${res.points ?? 0} 🧠`;
+        teamNameDisplay.textContent = res.team || '–';
+        teamPointsDisplay.textContent = `${res.team_points ?? '–'} 🧠`;
+        displayLots(res.bonuses || [], res.points ?? 0);
+      } else {
+        lotsDisplay.innerHTML = '<p class="text-gray-500 col-span-full">Ошибка загрузки лотов</p>';
+      }
+    }
+
+    function displayLots(lots, userPoints) {
+      lotsDisplay.innerHTML = '';
+      if (!lots.length) {
+        lotsDisplay.innerHTML = '<p class="text-gray-500 col-span-full">Нет доступных артефактов</p>';
         return;
-    }
+      }
 
-    lots.forEach(lot => {
-        const lotItem = document.createElement('div');
-        lotItem.className = 'bg-gray-50 rounded-lg shadow p-4 lot-item flex flex-col'; // Добавил flex-col
-
-        const isAvailable = userPoints >= lot.cost;
-        const buttonDisabled = !isAvailable;
-        const statusClass = isAvailable ? 'text-green-600' : 'text-red-500';
-        const missingText = isAvailable ? '' : ` (недостает ${lot.missing_points} 🧠)`;
-
-        lotItem.innerHTML = `
-            ${lot.image_url ? `<img src="${lot.image_url}" alt="${lot.title}" class="rounded-md mb-3">` : ''}
-            <h3 class="text-lg font-bold mb-1">${lot.title}</h3>
-            <p class="text-sm text-gray-700 mb-2 flex-grow">${lot.description}</p>
-            <div class="text-md font-semibold text-gray-800 mb-3">Стоимость: <span class="text-yellow-600">${lot.cost} 🧠</span></div>
-            <div class="text-xs italic ${statusClass} mb-3">${lot.available === 'да' ? 'Доступен' : 'Недоступен'}${missingText}</div>
-            <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200 buy-button"
-                    data-lot-name="${lot.title}"
-                    ${buttonDisabled ? 'disabled' : ''}>
-                Купить
-            </button>
+      lots.forEach(lot => {
+        const available = userPoints >= lot.cost;
+        const card = document.createElement('div');
+        card.className = 'bg-gray-50 p-4 rounded-xl shadow flex flex-col';
+        card.innerHTML = `
+          ${lot.image_url ? `<img src="${lot.image_url}" class="mb-3 h-40 w-full object-cover rounded-md">` : ''}
+          <h3 class="text-lg font-bold mb-1">${lot.title}</h3>
+          <p class="text-sm text-gray-700 mb-2 flex-grow">${lot.description}</p>
+          <p class="font-semibold text-gray-800 mb-2">Стоимость: <span class="text-yellow-600">${lot.cost} 🧠</span></p>
+          <p class="text-xs ${available ? 'text-green-600' : 'text-red-500'} mb-2">${available ? 'Доступен' : `Недоступен (нужно ${lot.missing_points} 🧠)`}</p>
+          <button class="mt-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 disabled:opacity-50" ${available ? '' : 'disabled'} data-lot="${lot.title}">Купить</button>
         `;
-        lotsDisplay.appendChild(lotItem);
-    });
-
-    // Добавляем обработчики событий для новых кнопок
-    document.querySelectorAll('.buy-button').forEach(button => {
-        button.addEventListener('click', (event) => {
-            const lotName = event.target.dataset.lotName;
-            if (lotName) {
-                buyLot(lotName);
-            }
-        });
-    });
-}
-
-/**
- * Обрабатывает покупку лота.
- * @param {string} lotName - Название лота для покупки.
- */
-async function buyLot(lotName) {
-    // Подтверждение перед покупкой
-    if (!confirm(`Вы уверены, что хотите купить "${lotName}" за сказочную мудрость?`)) {
-        return;
+        card.querySelector('button').addEventListener('click', () => buyLot(lot.title));
+        lotsDisplay.appendChild(card);
+      });
     }
 
-    showMessage('Покупка артефакта...', 'info');
-    // Отключаем все кнопки покупки, чтобы предотвратить повторные клики
-    document.querySelectorAll('.buy-button').forEach(btn => btn.disabled = true);
-
-    const data = {
-        user_id: userId,
-        username: username,
-        lot_name: lotName
-    };
-
-    const response = await sendPostRequest('buy_lot', data);
-
-    if (response && response.status === 'success') {
-        showMessage(response.message, 'success');
-        // Обновляем данные пользователя и лоты после успешной покупки
-        await loadUserData();
-    } else {
-        const errorMessage = response.message || 'Не удалось завершить покупку артефакта.';
-        showMessage(errorMessage, 'error');
+    async function buyLot(lotName) {
+      if (!confirm(`Купить "${lotName}" за мудрость?`)) return;
+      showMessage('Покупка...', 'info');
+      const res = await sendPost('buy_lot', { user_id: userId, username, lot_name: lotName });
+      showMessage(res.message || 'Не удалось купить', res.status === 'success' ? 'success' : 'error');
+      if (res.status === 'success') loadUserData();
     }
-    // Включаем кнопки обратно
-    document.querySelectorAll('.buy-button').forEach(btn => btn.disabled = false);
-}
 
-/**
- * Отображает всплывающее сообщение для пользователя.
- * @param {string} message - Текст сообщения.
- * @param {'success'|'error'|'info'} type - Тип сообщения для стилизации.
- */
-function showMessage(message, type) {
-    messageArea.textContent = message;
-    messageArea.className = `message-area ${type}`; // Обновляем классы
-    messageArea.style.display = message ? 'block' : 'none'; // Показываем или скрываем
-
-    if (type === 'success' || type === 'error') {
-        setTimeout(() => {
-            messageArea.style.display = 'none';
-        }, 5000); // Скрываем через 5 секунд
-    }
-}
-
-// Загрузка задач (ваш существующий код)
-async function loadTasks() {
-    try {
-        const response = await fetch(`${PROXY_API_URL}/api/load_tasks`);
-        const tasks = await response.json();
-
+    async function loadTasks() {
+      try {
+        const res = await fetch(`${PROXY_API_URL}/api/load_tasks`);
+        const tasks = await res.json();
         tasksContainer.innerHTML = '';
-        if (!tasks || tasks.length === 0) {
-            tasksContainer.innerHTML = '<p class="text-gray-500">Нет доступных заданий.</p>';
-            return;
+
+        if (!tasks.length) {
+          tasksContainer.innerHTML = '<p class="text-gray-500">Нет доступных заданий</p>';
+          return;
         }
 
         tasks.forEach(task => {
-            const block = document.createElement('div');
-            block.className = 'bg-white rounded-2xl shadow p-4';
-            block.innerHTML = `
-                <h2 class="text-xl font-semibold mb-2">🤩 ${task.title}</h2>
-                <p class="text-sm mb-2 text-gray-700">${task.description}</p>
-                <form class="space-y-2 task-form">
-                    <input type="url" name="url" placeholder="Ссылка на ответ" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required />
-                    <button type="submit" class="w-full bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
-                </form>`;
-            block.querySelector('form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const url = e.target.url.value.trim();
-                if (!url) return;
-
-                const submitResponse = await sendPostRequest('submit_task_response', {
-                    user_id: userId,
-                    username: username,
-                    url: url,
-                    task: task.title
-                });
-
-                if (submitResponse && !submitResponse.error) {
-                    showMessage("Спасибо! Мудрость получена.", 'success');
-                    loadUserData();
-                    e.target.url.value = '';
-                } else {
-                    showMessage("Ошибка при отправке задания.", 'error');
-                }
-            });
-            tasksContainer.appendChild(block);
+          const block = document.createElement('div');
+          block.className = 'bg-white rounded-2xl shadow p-4';
+          block.innerHTML = `
+            <h2 class="text-xl font-semibold mb-2">🤩 ${task.title}</h2>
+            <p class="text-sm mb-2 text-gray-700">${task.description}</p>
+            <form class="space-y-2">
+              <input type="url" name="url" required placeholder="Ссылка на ответ" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+              <button type="submit" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 text-sm">Отправить</button>
+            </form>
+          `;
+          block.querySelector('form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const url = e.target.url.value.trim();
+            if (!url) return;
+            const res = await sendPost('submit_task_response', { user_id: userId, username, url, task: task.title });
+            showMessage(res.error ? 'Ошибка при отправке' : 'Спасибо! Мудрость получена.', res.error ? 'error' : 'success');
+            if (!res.error) loadUserData();
+            e.target.reset();
+          });
+          tasksContainer.appendChild(block);
         });
-    } catch (error) {
-        console.error('Ошибка при загрузке заданий:', error);
-        showMessage('Не удалось загрузить задания.', 'error');
-    }
-}
-
-
-// Запуск функций при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    // Если есть keyword (например, из start_param), отправляем его
-    if (keyword) {
-        sendPostRequest('submit_keyword', { user_id: userId, username: username, keyword: keyword })
-            .then(response => {
-                if (response && response.status === 'added') {
-                    showMessage(`Мудрость за ключевое слово "${keyword}" успешно добавлена!`, 'success');
-                } else if (response && response.status === 'already_scanned') {
-                    showMessage(`Ключевое слово "${keyword}" уже было сканировано ранее.`, 'info');
-                } else if (response && response.status === 'not found') {
-                    showMessage(`Ключевое слово "${keyword}" не найдено или недействительно.`, 'error');
-                } else if (response && response.error) {
-                    showMessage(`Ошибка при обработке ключевого слова: ${response.error}`, 'error');
-                }
-                loadUserData(); // Загружаем данные после обработки ключевого слова
-            })
-            .catch(() => {
-                showMessage('Ошибка при отправке ключевого слова.', 'error');
-                loadUserData(); // Загружаем данные даже при ошибке
-            });
-    } else {
-        loadUserData(); // Если нет keyword, просто загружаем данные пользователя
+      } catch (e) {
+        showMessage('Ошибка загрузки заданий.', 'error');
+      }
     }
 
-    loadTasks(); // Загружаем задачи
-});
-    </script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (keyword) {
+        const res = await sendPost('submit_keyword', { user_id: userId, username, keyword });
+        if (res.status === 'added') {
+          showMessage(`Мудрость за ключ "${keyword}" получена!`, 'success');
+        } else if (res.status === 'already_scanned') {
+          showMessage(`Ключ "${keyword}" уже использован.`, 'info');
+        } else {
+          showMessage(`Ключ "${keyword}" не найден.`, 'error');
+        }
+      }
+      await loadUserData();
+      await loadTasks();
+    });
+  </script>
 </body>
-
 </html>
